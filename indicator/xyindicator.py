@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
 # Python code to convert an image to ASCII image.
-import sys, random, argparse
+import argparse
 import array, fcntl, termios
 import numpy as np
 import math
 
-from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageColor
+from PIL import Image, ImageDraw, ImageFont, ImageColor
 
 try:
     import curses
@@ -29,7 +29,6 @@ COLORS = {
 # gray scale level values from:
 # http://paulbourke.net/dataformats/asciiart/
 
-
 # 10 levels of gray
 GSCALE = '@%#*+=-:. '
 
@@ -50,53 +49,34 @@ def covertImageToAscii(image, rows, cols):
     """
     Given Image and dims (rows, cols) returns an m*n list of Images
     """
-    # open image and convert to grayscale
+    aimg = []
     image = image.convert('L')
-
-    # store dimensions
     width, height = image.size
-
     pixel_per_row = height/rows
     pixel_per_col = width/cols
-    
-    # ascii image is a list of character strings
-    aimg = []
 
-    # generate list of dimensions
     for j in range(rows):
         y1 = int(j*pixel_per_row)
         y2 = int((j+1)*pixel_per_row)
 
-        # correct last tile
         if j == rows-1:
             y2 = height
 
-        # append an empty string
         aimg.append("")
 
         for i in range(cols):
-
-            # crop image to tile
             x1 = int(i*pixel_per_col)
             x2 = int((i+1)*pixel_per_col)
 
-            # correct last tile
             if i == cols-1:
                 x2 = width
 
-            # crop image to extract tile
             img = image.crop((x1, y1, x2, y2))
-
-            # get average luminance
             avg = int(getAverageL(img))
-
-            # look up ascii char
             gsval = GSCALE[int((avg*9)/255)]
 
-            # append ascii char to string
             aimg[j] += gsval
-    
-    # return txt image
+ 
     return aimg
 
 # main() function
