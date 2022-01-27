@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# Adapted from ascii.py of Mahesh Venkitachalam
+
 # Python code to convert an image to ASCII image.
 import sys, random, argparse
 import array, fcntl, termios
@@ -142,7 +144,7 @@ def main(stdscr):
     font = ImageFont.truetype('./Arial Black.ttf', fontsize)
     draw = ImageDraw.Draw(image)
     x, y = pxx / 2, pxy / 2
-    draw.text((x, y), args.letter, font=font, fill=ImageColor.getrgb('red'), anchor='mm')
+    draw.text((x, y), args.letter, font=font, fill=ImageColor.getrgb('black'), anchor='mm')
 
     # convert image to ascii txt
     aimg = covertImageToAscii(image, rows, cols)
