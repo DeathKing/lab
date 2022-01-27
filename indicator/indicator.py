@@ -64,6 +64,7 @@ def covertImageToAscii(image, rows, cols, moreLevels):
 
 	# store dimensions
 	W, H = image.size[0], image.size[1]
+	ratio = W/H
 	
 	# ascii image is a list of character strings
 	aimg = []
@@ -82,8 +83,8 @@ def covertImageToAscii(image, rows, cols, moreLevels):
 		for i in range(cols):
 
 			# crop image to tile
-			x1 = int(i*PIXLE_PER_COL)
-			x2 = int((i+1)*PIXLE_PER_COL)
+			x1 = int(i*PIXLE_PER_ROW)
+			x2 = int((i+1)*PIXLE_PER_ROW)
 
 			# correct last tile
 			if i == cols-1:
@@ -136,35 +137,39 @@ def main(stdscr):
 	# Your application can determine the size of the screen by using the curses.LINES
 	# and curses.COLS variables to obtain the y and x sizes.
 	# Legal coordinates will then extend from (0,0) to (curses.LINES - 1, curses.COLS - 1).
-	height, width = stdscr.getmaxyx()
+	# Legal coordinates will be from (0,0) to (cols-1, rows-1)	
+	rows, cols = stdscr.getmaxyx()
+	ratio = cols / rows
 
-	# set cols
-	cols = width
-	#if args.cols:
-	#	cols = int(args.cols)
-
-	imgHeight, imgWidth = height * PIXLE_PER_ROW, width * PIXLE_PER_COL
+	imgHeight = rows * PIXLE_PER_ROW
+	imgWidth  = cols * PIXLE_PER_ROW
 
 	image = Image.new('RGB', (imgWidth, imgHeight), (255, 255, 255))
 
 	font = ImageFont.truetype('./Arial Black.ttf', 360)
 	area = font.getsize(args.letter)
+	box  = font.getbbox(args.letter, anchor='mm')
 
 	draw = ImageDraw.Draw(image)
 	x, y = (imgWidth-area[0])/2, (imgHeight-area[1])/2
-	draw.text((x, y), args.letter, font=font, fill=ImageColor.getrgb('red'))
+	x, y = imgWidth / 2, imgHeight / 2
+	draw.text((x, y), args.letter, font=font, fill=ImageColor.getrgb('red'), anchor='mm')
+	image.save('test.jpg', 'jpeg')
 
 	#print('generating ASCII art...')
 	# convert image to ascii txt
-	aimg = covertImageToAscii(image, height, width, args.moreLevels)
+	aimg = covertImageToAscii(image, rows, cols, args.moreLevels)
 	
 	# stdscr.addstr(1, 0, f"row{height}, col{width}")
 	# stdscr.addstr(2, 0, f"imgHeight{imgHeight}, imgWidth{imgWidth}")
 	# stdscr.addstr(3, 0, f"row aimg{len(aimg)} col aimg{len(aimg[0])}")
 	# write to file
 	for idx, row in enumerate(aimg):
-		#stdscr.addstr(idx+1, 1, f"{len(row)}")
+		# stdscr.addstr(idx, 1, f"{len(row)}")
 		stdscr.addstr(idx, 0, row[0:cols-1])
+	#import os
+	#stdscr.addstr(1, 1, os.environ.get('SCR_W'))
+	#stdscr.addstr(1, 1, f"{area} {box} #{x} #{y} #{imgWidth} {imgHeight}")
 
 	stdscr.border()
 	stdscr.refresh()
